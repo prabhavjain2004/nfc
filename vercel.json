@@ -6,11 +6,16 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
+        "runtime": "python3.9",
+        "buildCommand": "pip install -r requirements.txt"
       }
     }
   ],
   "routes": [
+    {
+      "src": "/health",
+      "dest": "/api/index.py"
+    },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
@@ -22,6 +27,8 @@
   ],
   "env": {
     "PYTHONPATH": ".",
-    "DJANGO_SETTINGS_MODULE": "nfc_system.settings"
+    "DJANGO_SETTINGS_MODULE": "nfc_system.settings",
+    "PYTHONUNBUFFERED": "1",
+    "DEBUG": "False"
   }
 }

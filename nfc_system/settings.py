@@ -11,13 +11,63 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-your-secret-key-here')
 
-# SECURITY WARNING: don't run with debug turned on in production!
+# Debug configuration
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+# Hosts configuration
+ALLOWED_HOSTS = [
+    '.vercel.app',
+    'localhost',
+    '127.0.0.1',
+    '*'  # Temporarily allow all hosts
+]
+
+# Database configuration
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql_psycopg2'),
+            'HOST': os.getenv('HOST', ''),
+            'NAME': os.getenv('NAME', ''),
+            'USER': os.getenv('USER', ''),
+            'PASSWORD': os.getenv('PASSWORD', ''),
+            'PORT': os.getenv('PORT', '5432'),
+            'CONN_MAX_AGE': 0,
+        }
+    }
+
+# Security settings for production
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 
 # Vercel specific settings
-WSGI_APPLICATION = 'api.index.handler'
+WSGI_APPLICATION = 'nfc_system.wsgi.application'
+
+# Configure logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
 
 # Application definition
 INSTALLED_APPS = [
