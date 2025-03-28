@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard - NFC Payment System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Customer Portal</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-section="overview">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="cards">My Cards</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="transactions">Transactions</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="logout">Logout</a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Wallet Balance</h3>
+                        <div class="value" id="walletBalance">₹0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Cards</h3>
+                        <div class="value" id="activeCards">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Transactions</h3>
+                        <div class="value" id="totalTransactions">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Recent Transactions</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="recentTransactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Transaction ID</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cards Section -->
+            <section id="cards" class="dashboard-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">My NFC Cards</h2>
+                        <button class="btn btn-primary" id="linkCardBtn">Link New Card</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="cardsTable">
+                            <thead>
+                                <tr>
+                                    <th>Card Number</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Link Card Modal -->
+                <div id="linkCardModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Link New Card</h2>
+                        <form id="linkCardForm">
+                            <div class="form-group">
+                                <label for="cardNumber">Card Number</label>
+                                <input type="text" id="cardNumber" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Link Card</button>
+                            <button type="button" class="btn btn-secondary" id="cancelLinkCard">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions" class="dashboard-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Transaction History</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="transactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Transaction ID</th>
+                                    <th>Type</th>
+                                    <th>Card Number</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (e.target.id === 'logout') {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                const section = e.target.dataset.section;
+                document.querySelectorAll('.dashboard-section').forEach(s => {
+                    s.classList.remove('active');
+                });
+                document.getElementById(section).classList.add('active');
+
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('active');
+                });
+                e.target.classList.add('active');
+            });
+        });
+
+        // Fetch user data and update dashboard
+        async function fetchUserData() {
+            try {
+                const response = await fetch('/api/users/me/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const userData = await response.json();
+                document.getElementById('walletBalance').textContent = `₹${userData.balance.toFixed(2)}`;
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        }
+
+        // Fetch cards
+        async function fetchCards() {
+            try {
+                const response = await fetch('/api/cards/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const cards = await response.json();
+                document.getElementById('activeCards').textContent = cards.filter(card => card.is_active).length;
+                
+                const tbody = document.querySelector('#cardsTable tbody');
+                tbody.innerHTML = '';
+                cards.forEach(card => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${card.card_number}</td>
+                            <td>₹${card.balance.toFixed(2)}</td>
+                            <td>${card.is_active ? 'Active' : 'Inactive'}</td>
+                            <td>
+                                <button class="btn btn-danger" onclick="deactivateCard('${card.id}')">
+                                    ${card.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+            }
+        }
+
+        // Fetch transactions
+        async function fetchTransactions() {
+            try {
+                const response = await fetch('/api/transactions/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const transactions = await response.json();
+                document.getElementById('totalTransactions').textContent = transactions.length;
+
+                const formatTransaction = (transaction) => `
+                    <tr>
+                        <td>${new Date(transaction.created_at).toLocaleDateString()}</td>
+                        <td>${transaction.transaction_id}</td>
+                        <td>${transaction.transaction_type}</td>
+                        <td>₹${transaction.amount.toFixed(2)}</td>
+                        <td>${transaction.status}</td>
+                    </tr>
+                `;
+
+                // Update recent transactions
+                const recentTbody = document.querySelector('#recentTransactionsTable tbody');
+                recentTbody.innerHTML = transactions
+                    .slice(0, 5)
+                    .map(formatTransaction)
+                    .join('');
+
+                // Update full transaction history
+                const fullTbody = document.querySelector('#transactionsTable tbody');
+                fullTbody.innerHTML = transactions
+                    .map(transaction => `
+                        <tr>
+                            <td>${new Date(transaction.created_at).toLocaleDateString()}</td>
+                            <td>${transaction.transaction_id}</td>
+                            <td>${transaction.transaction_type}</td>
+                            <td>${transaction.card_number}</td>
+                            <td>₹${transaction.amount.toFixed(2)}</td>
+                            <td>${transaction.status}</td>
+                        </tr>
+                    `)
+                    .join('');
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
+            }
+        }
+
+        // Link new card
+        document.getElementById('linkCardBtn').addEventListener('click', () => {
+            document.getElementById('linkCardModal').style.display = 'block';
+        });
+
+        document.getElementById('cancelLinkCard').addEventListener('click', () => {
+            document.getElementById('linkCardModal').style.display = 'none';
+        });
+
+        document.getElementById('linkCardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cardNumber = document.getElementById('cardNumber').value;
+
+            try {
+                const response = await fetch('/api/cards/link_card/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ card_number: cardNumber })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to link card');
+                }
+
+                document.getElementById('linkCardModal').style.display = 'none';
+                document.getElementById('cardNumber').value = '';
+                fetchCards();
+            } catch (error) {
+                alert('Failed to link card. Please try again.');
+                console.error('Error linking card:', error);
+            }
+        });
+
+        // Initial data load
+        fetchUserData();
+        fetchCards();
+        fetchTransactions();
+
+        // Refresh data periodically
+        setInterval(() => {
+            fetchUserData();
+            fetchCards();
+            fetchTransactions();
+        }, 30000);
+    </script>
+</body>
+</html>

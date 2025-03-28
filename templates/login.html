@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Payment System - Login</title>
+    <link rel="stylesheet" href="/static/css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            <p class="auth-link">Don't have an account? <a href="/register">Register</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            };
+
+            try {
+                const response = await fetch('/api/token/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Login failed');
+                }
+
+                const data = await response.json();
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+
+                // Get user details
+                const userResponse = await fetch('/api/users/me/', {
+                    headers: {
+                        'Authorization': `Bearer ${data.access}`
+                    }
+                });
+                const userData = await userResponse.json();
+
+                // Redirect based on role
+                switch (userData.role) {
+                    case 'CUSTOMER':
+                        window.location.href = '/dashboard/customer/';
+                        break;
+                    case 'OUTLET':
+                        window.location.href = '/dashboard/outlet/';
+                        break;
+                    case 'ADMIN':
+                        window.location.href = '/dashboard/admin/';
+                        break;
+                    default:
+                        throw new Error('Invalid user role');
+                }
+            } catch (error) {
+                alert('Login failed. Please check your credentials.');
+                console.error('Login error:', error);
+            }
+        });
+    </script>
+</body>
+</html>

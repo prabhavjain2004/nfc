@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NFC Payment System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Admin Portal</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" data-section="overview">Overview</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="users">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="cards">Cards</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="transactions">Transactions</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" data-section="settlements">Settlements</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="logout">Logout</a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview" class="dashboard-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <div class="value" id="totalUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Cards</h3>
+                        <div class="value" id="activeCards">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Transactions</h3>
+                        <div class="value" id="totalTransactions">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Transaction Value</h3>
+                        <div class="value" id="totalValue">₹0.00</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">System Analytics</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Customers</h3>
+                            <div class="value" id="customerCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Outlets</h3>
+                            <div class="value" id="outletCount">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Pending Settlements</h3>
+                            <div class="value" id="pendingSettlements">₹0.00</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="dashboard-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">User Management</h2>
+                        <button class="btn btn-primary" id="addUserBtn">Add User</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Balance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Add/Edit User Modal -->
+                <div id="userModal" class="modal">
+                    <div class="modal-content">
+                        <h2 id="userModalTitle">Add User</h2>
+                        <form id="userForm">
+                            <div class="form-group">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="role">Role</label>
+                                <select id="role" required>
+                                    <option value="CUSTOMER">Customer</option>
+                                    <option value="OUTLET">Outlet</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" id="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" id="cancelUser">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cards Section -->
+            <section id="cards" class="dashboard-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Card Management</h2>
+                        <button class="btn btn-primary" id="issueCardBtn">Issue New Card</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="cardsTable">
+                            <thead>
+                                <tr>
+                                    <th>Card Number</th>
+                                    <th>Customer</th>
+                                    <th>Balance</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Issue Card Modal -->
+                <div id="cardModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Issue New Card</h2>
+                        <form id="cardForm">
+                            <div class="form-group">
+                                <label for="cardNumber">Card Number</label>
+                                <input type="text" id="cardNumber" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customerSelect">Customer (Optional)</label>
+                                <select id="customerSelect">
+                                    <option value="">Select Customer</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Issue Card</button>
+                            <button type="button" class="btn btn-secondary" id="cancelCard">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Recharge Modal -->
+                <div id="rechargeModal" class="modal">
+                    <div class="modal-content">
+                        <h2>Recharge Card</h2>
+                        <form id="rechargeForm">
+                            <div class="form-group">
+                                <label for="rechargeAmount">Amount (₹)</label>
+                                <input type="number" id="rechargeAmount" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Recharge</button>
+                            <button type="button" class="btn btn-secondary" id="cancelRecharge">Cancel</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Transactions Section -->
+            <section id="transactions" class="dashboard-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Transaction History</h2>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="transactionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Transaction ID</th>
+                                    <th>Type</th>
+                                    <th>Customer</th>
+                                    <th>Outlet</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settlements Section -->
+            <section id="settlements" class="dashboard-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Settlement Management</h2>
+                        <button class="btn btn-primary" id="processSettlementsBtn">Process Settlements</button>
+                    </div>
+                    <div class="table-container">
+                        <table class="table" id="settlementsTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Outlet</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Authentication check
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            window.location.href = '/';
+        }
+
+        // Navigation
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (e.target.id === 'logout') {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    window.location.href = '/';
+                    return;
+                }
+
+                const section = e.target.dataset.section;
+                document.querySelectorAll('.dashboard-section').forEach(s => {
+                    s.classList.remove('active');
+                });
+                document.getElementById(section).classList.add('active');
+
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('active');
+                });
+                e.target.classList.add('active');
+            });
+        });
+
+        // Fetch analytics
+        async function fetchAnalytics() {
+            try {
+                const response = await fetch('/api/analytics/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                document.getElementById('totalUsers').textContent = 
+                    data.total_customers + data.total_outlets;
+                document.getElementById('activeCards').textContent = data.active_cards;
+                document.getElementById('totalTransactions').textContent = data.total_transactions;
+                document.getElementById('totalValue').textContent = `₹${data.total_amount.toFixed(2)}`;
+                document.getElementById('customerCount').textContent = data.total_customers;
+                document.getElementById('outletCount').textContent = data.total_outlets;
+            } catch (error) {
+                console.error('Error fetching analytics:', error);
+            }
+        }
+
+        // Fetch users
+        async function fetchUsers() {
+            try {
+                const response = await fetch('/api/users/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const users = await response.json();
+                
+                const tbody = document.querySelector('#usersTable tbody');
+                tbody.innerHTML = users
+                    .map(user => `
+                        <tr>
+                            <td>${user.username}</td>
+                            <td>${user.role}</td>
+                            <td>${user.email}</td>
+                            <td>${user.is_active ? 'Active' : 'Inactive'}</td>
+                            <td>₹${user.balance.toFixed(2)}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="editUser(${user.id})">Edit</button>
+                                <button class="btn btn-danger" onclick="toggleUserStatus(${user.id})">
+                                    ${user.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </td>
+                        </tr>
+                    `)
+                    .join('');
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        }
+
+        // Fetch cards
+        async function fetchCards() {
+            try {
+                const response = await fetch('/api/cards/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const cards = await response.json();
+                
+                const tbody = document.querySelector('#cardsTable tbody');
+                tbody.innerHTML = cards
+                    .map(card => `
+                        <tr>
+                            <td>${card.card_number}</td>
+                            <td>${card.customer ? card.customer_name : 'Unassigned'}</td>
+                            <td>₹${card.balance.toFixed(2)}</td>
+                            <td>${card.is_active ? 'Active' : 'Inactive'}</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="rechargeCard('${card.id}')">Recharge</button>
+                                <button class="btn btn-danger" onclick="toggleCardStatus('${card.id}')">
+                                    ${card.is_active ? 'Deactivate' : 'Activate'}
+                                </button>
+                            </td>
+                        </tr>
+                    `)
+                    .join('');
+            } catch (error) {
+                console.error('Error fetching cards:', error);
+            }
+        }
+
+        // Fetch transactions
+        async function fetchTransactions() {
+            try {
+                const response = await fetch('/api/transactions/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const transactions = await response.json();
+                
+                const tbody = document.querySelector('#transactionsTable tbody');
+                tbody.innerHTML = transactions
+                    .map(t => `
+                        <tr>
+                            <td>${new Date(t.created_at).toLocaleDateString()}</td>
+                            <td>${t.transaction_id}</td>
+                            <td>${t.transaction_type}</td>
+                            <td>${t.customer_name}</td>
+                            <td>${t.outlet_name || '-'}</td>
+                            <td>₹${t.amount.toFixed(2)}</td>
+                            <td>${t.status}</td>
+                        </tr>
+                    `)
+                    .join('');
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
+            }
+        }
+
+        // Fetch settlements
+        async function fetchSettlements() {
+            try {
+                const response = await fetch('/api/settlements/', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const settlements = await response.json();
+                
+                const pendingAmount = settlements
+                    .filter(s => s.status === 'PENDING')
+                    .reduce((sum, s) => sum + parseFloat(s.amount), 0);
+                document.getElementById('pendingSettlements').textContent = 
+                    `₹${pendingAmount.toFixed(2)}`;
+
+                const tbody = document.querySelector('#settlementsTable tbody');
+                tbody.innerHTML = settlements
+                    .map(s => `
+                        <tr>
+                            <td>${new Date(s.created_at).toLocaleDateString()}</td>
+                            <td>${s.outlet_name}</td>
+                            <td>₹${s.amount.toFixed(2)}</td>
+                            <td>${s.status}</td>
+                            <td>
+                                ${s.status === 'PENDING' ? `
+                                    <button class="btn btn-primary" onclick="processSettlement(${s.id})">
+                                        Process
+                                    </button>
+                                ` : '-'}
+                            </td>
+                        </tr>
+                    `)
+                    .join('');
+            } catch (error) {
+                console.error('Error fetching settlements:', error);
+            }
+        }
+
+        // Event Listeners for Modals
+        document.getElementById('addUserBtn').addEventListener('click', () => {
+            document.getElementById('userModal').style.display = 'block';
+        });
+
+        document.getElementById('issueCardBtn').addEventListener('click', () => {
+            document.getElementById('cardModal').style.display = 'block';
+        });
+
+        document.getElementById('processSettlementsBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/settlements/process/', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to process settlements');
+                }
+
+                alert('Settlements processed successfully');
+                fetchSettlements();
+            } catch (error) {
+                alert('Failed to process settlements');
+                console.error('Error processing settlements:', error);
+            }
+        });
+
+        // Close modal buttons
+        ['cancelUser', 'cancelCard', 'cancelRecharge'].forEach(id => {
+            document.getElementById(id)?.addEventListener('click', () => {
+                document.getElementById(id.replace('cancel', '').toLowerCase() + 'Modal').style.display = 'none';
+            });
+        });
+
+        // Form submissions
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // Implementation for user form submission
+        });
+
+        document.getElementById('cardForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // Implementation for card form submission
+        });
+
+        document.getElementById('rechargeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            // Implementation for recharge form submission
+        });
+
+        // Initial data load
+        fetchAnalytics();
+        fetchUsers();
+        fetchCards();
+        fetchTransactions();
+        fetchSettlements();
+
+        // Refresh data periodically
+        setInterval(() => {
+            fetchAnalytics();
+            fetchUsers();
+            fetchCards();
+            fetchTransactions();
+            fetchSettlements();
+        }, 30000);
+    </script>
+</body>
+</html>
