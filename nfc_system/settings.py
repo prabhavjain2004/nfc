@@ -14,7 +14,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-your-secret-key-here')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['.vercel.app', 'localhost', '127.0.0.1']
+
+# Vercel specific settings
+WSGI_APPLICATION = 'api.index.handler'
 
 # Application definition
 INSTALLED_APPS = [
