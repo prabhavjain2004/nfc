@@ -13,7 +13,8 @@
       "src": "build_file.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "staticfiles"
+        "distDir": "staticfiles",
+        "buildCommand": "chmod +x build_file.sh && ./build_file.sh"
       }
     }
   ],
@@ -28,6 +29,7 @@
     }
   ],
   "env": {
-    "PYTHONUNBUFFERED": "1"
+    "PYTHONUNBUFFERED": "1",
+    "PYTHON_VERSION": "3.9"
   }
 }
