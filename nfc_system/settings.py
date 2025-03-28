@@ -67,26 +67,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'nfc_system.wsgi.application'
 
-# Database configuration
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+
+DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('ENGINE'),
+        'NAME': os.getenv('NAME'),
+        'USER': os.getenv('USER'),
+        'PASSWORD': os.getenv('PASSWORD'),
+        'HOST': os.getenv('HOST'),
+        'PORT': os.getenv('PORT'),
+        'CONN_MAX_AGE': 0,  # Disable persistent connections for serverless
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('ENGINE'),
-            'NAME': os.getenv('NAME'),
-            'USER': os.getenv('USER'),
-            'PASSWORD': os.getenv('PASSWORD'),
-            'HOST': os.getenv('HOST'),
-            'PORT': os.getenv('PORT'),
-            'CONN_MAX_AGE': 0,  # Disable persistent connections for serverless
-        }
-    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [

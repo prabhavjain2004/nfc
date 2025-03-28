@@ -1,36 +1,26 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "api/index.py",
-      "use": "@vercel/python",
+      "src": "build_files.sh",
+      "use": "@vercel/static-build",
       "config": {
-        "maxLambdaSize": "15mb",
-        "runtime": "python3.9"
+        "distDir": "static"
       }
+    },
+    {
+      "src": "/mywebsite/wsgi.py",
+      "use": "@vercel/python",
+      "config": { "maxLambdaSize": "15mb" }
     }
   ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/staticfiles/$1"
+      "src": "/(.*)",
+      "dest": "mywebsite/wsgi.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "/api/index.py"
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
     }
-  ],
-  "env": {
-    "PYTHONPATH": ".",
-    "DJANGO_SETTINGS_MODULE": "nfc_system.settings",
-    "PYTHONUNBUFFERED": "1",
-    "DEBUG": "False",
-    "SECRET_KEY": "@secret_key",
-    "ENGINE": "django.db.backends.postgresql_psycopg2",
-    "USER": "@db_user",
-    "PASSWORD": "@db_password",
-    "HOST": "@db_host",
-    "PORT": "@db_port",
-    "NAME": "@db_name"
-  }
+  ]
 }
