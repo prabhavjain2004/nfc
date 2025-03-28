@@ -7,18 +7,26 @@
       "config": {
         "maxLambdaSize": "15mb",
         "runtime": "python3.9",
-        "buildCommand": "pip install -r requirements.txt"
+        "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput"
       }
     }
   ],
   "routes": [
     {
-      "src": "/health",
+      "src": "/static/(.*)",
+      "dest": "/staticfiles/$1"
+    },
+    {
+      "src": "/media/(.*)",
+      "dest": "/media/$1"
+    },
+    {
+      "src": "/admin/(.*)",
       "dest": "/api/index.py"
     },
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "src": "/api/(.*)",
+      "dest": "/api/index.py"
     },
     {
       "src": "/(.*)",
@@ -29,6 +37,7 @@
     "PYTHONPATH": ".",
     "DJANGO_SETTINGS_MODULE": "nfc_system.settings",
     "PYTHONUNBUFFERED": "1",
-    "DEBUG": "False"
+    "DEBUG": "False",
+    "ALLOWED_HOSTS": ".vercel.app"
   }
 }

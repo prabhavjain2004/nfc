@@ -23,50 +23,16 @@ ALLOWED_HOSTS = [
 ]
 
 # Database configuration
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql_psycopg2'),
+        'HOST': os.getenv('HOST', ''),
+        'NAME': os.getenv('NAME', ''),
+        'USER': os.getenv('USER', ''),
+        'PASSWORD': os.getenv('PASSWORD', ''),
+        'PORT': os.getenv('PORT', '5432'),
+        'CONN_MAX_AGE': 0,
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql_psycopg2'),
-            'HOST': os.getenv('HOST', ''),
-            'NAME': os.getenv('NAME', ''),
-            'USER': os.getenv('USER', ''),
-            'PASSWORD': os.getenv('PASSWORD', ''),
-            'PORT': os.getenv('PORT', '5432'),
-            'CONN_MAX_AGE': 0,
-        }
-    }
-
-# Security settings for production
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-
-# Vercel specific settings
-WSGI_APPLICATION = 'nfc_system.wsgi.application'
-
-# Configure logging
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
 }
 
 # Application definition
@@ -84,6 +50,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -112,18 +79,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nfc_system.wsgi.application'
-
-# Database
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql_psycopg2'),
-        'HOST': os.getenv('HOST', ''),
-        'NAME': os.getenv('NAME', ''),
-        'USER': os.getenv('USER', ''),
-        'PASSWORD': os.getenv('PASSWORD', ''),
-        'PORT': os.getenv('PORT', '5432'),
-    }
-}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -156,9 +111,7 @@ STATICFILES_DIRS = [
 ]
 
 # Simplified static file serving for production
-if not DEBUG:
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -187,9 +140,25 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-# Security settings
-SECURE_SSL_REDIRECT = not DEBUG
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
+# Security settings - adjusted for Vercel
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False  # Vercel handles SSL
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Configure logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
