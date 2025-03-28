@@ -9,7 +9,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-your-secret-key-here')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # Debug configuration
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
@@ -19,21 +19,8 @@ ALLOWED_HOSTS = [
     '.vercel.app',
     'localhost',
     '127.0.0.1',
-    '*'  # Temporarily allow all hosts
+    '*'
 ]
-
-# Database configuration
-DATABASES = {
-    'default': {
-        'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql_psycopg2'),
-        'HOST': os.getenv('HOST', ''),
-        'NAME': os.getenv('NAME', ''),
-        'USER': os.getenv('USER', ''),
-        'PASSWORD': os.getenv('PASSWORD', ''),
-        'PORT': os.getenv('PORT', '5432'),
-        'CONN_MAX_AGE': 0,
-    }
-}
 
 # Application definition
 INSTALLED_APPS = [
@@ -50,7 +37,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise for static files
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -79,6 +66,27 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nfc_system.wsgi.application'
+
+# Database configuration
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('ENGINE'),
+            'NAME': os.getenv('NAME'),
+            'USER': os.getenv('USER'),
+            'PASSWORD': os.getenv('PASSWORD'),
+            'HOST': os.getenv('HOST'),
+            'PORT': os.getenv('PORT'),
+            'CONN_MAX_AGE': 0,  # Disable persistent connections for serverless
+        }
+    }
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -140,14 +148,6 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-# Security settings - adjusted for Vercel
-if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Vercel handles SSL
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-
 # Configure logging
 LOGGING = {
     'version': 1,
@@ -162,3 +162,14 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+# Security settings - adjusted for Vercel
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = [
+        'https://*.vercel.app',
+    ]
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_SSL_REDIRECT = False  # Handled by Vercel

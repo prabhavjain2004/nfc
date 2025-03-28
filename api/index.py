@@ -3,14 +3,10 @@ import sys
 from django.core.wsgi import get_wsgi_application
 from django.http import JsonResponse
 
-# Configure Django settings based on environment
-if os.getenv('VERCEL_ENV') == 'production':
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nfc_system.settings')
-    os.environ['DEBUG'] = 'False'
-else:
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nfc_system.local_settings')
-    os.environ['DEBUG'] = 'True'
+# Configure Django settings
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nfc_system.settings')
 
+# Initialize Django WSGI application
 try:
     # Initialize Django WSGI application
     application = get_wsgi_application()
@@ -28,11 +24,12 @@ def handler(request):
             }, status=500)
 
         # Basic health check endpoint
-        if request.path == '/health/':
+        if request.path == '/health':
             return JsonResponse({'status': 'ok'}, status=200)
 
         # Handle the request through Django WSGI
-        return application(request)
+        response = application(request)
+        return response
 
     except Exception as e:
         error_msg = str(e)
@@ -41,5 +38,5 @@ def handler(request):
         return JsonResponse({
             'error': 'Internal Server Error',
             'detail': error_msg,
-            'path': request.path
+            'path': getattr(request, 'path', 'unknown')
         }, status=500)

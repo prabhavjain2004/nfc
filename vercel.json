@@ -6,8 +6,7 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "15mb",
-        "runtime": "python3.9",
-        "buildCommand": "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+        "runtime": "python3.9"
       }
     }
   ],
@@ -15,18 +14,6 @@
     {
       "src": "/static/(.*)",
       "dest": "/staticfiles/$1"
-    },
-    {
-      "src": "/media/(.*)",
-      "dest": "/media/$1"
-    },
-    {
-      "src": "/admin/(.*)",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.py"
     },
     {
       "src": "/(.*)",
@@ -38,6 +25,12 @@
     "DJANGO_SETTINGS_MODULE": "nfc_system.settings",
     "PYTHONUNBUFFERED": "1",
     "DEBUG": "False",
-    "ALLOWED_HOSTS": ".vercel.app"
+    "SECRET_KEY": "@secret_key",
+    "ENGINE": "django.db.backends.postgresql_psycopg2",
+    "USER": "@db_user",
+    "PASSWORD": "@db_password",
+    "HOST": "@db_host",
+    "PORT": "@db_port",
+    "NAME": "@db_name"
   }
 }
