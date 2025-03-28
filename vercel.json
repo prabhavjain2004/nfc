@@ -8,7 +8,7 @@
         }
       },
       {
-        "src": "nfc_system/wsgi.py",
+        "src": "api/index.py",
         "use": "@vercel/python",
         "config": { "maxLambdaSize": "15mb" }
       }
@@ -20,7 +20,7 @@
       },
       {
         "src": "/(.*)",
-        "dest": "nfc_system/wsgi.py"
+        "dest": "api/index.py"
       }
     ]
   }

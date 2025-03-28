@@ -5,17 +5,20 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${GREEN}Setting up git configuration...${NC}"
-
-# Configure git
-echo -e "\n${GREEN}Enter your git username:${NC}"
-read git_username
-
-echo -e "\n${GREEN}Enter your git email:${NC}"
-read git_email
-
-git config --global user.name "$git_username"
-git config --global user.email "$git_email"
+# Check if git config exists
+if [[ -z $(git config --global user.name) ]] || [[ -z $(git config --global user.email) ]]; then
+    echo -e "${GREEN}Setting up git configuration...${NC}"
+    
+    # Configure git
+    echo -e "\n${GREEN}Enter your git username:${NC}"
+    read git_username
+    
+    echo -e "\n${GREEN}Enter your git email:${NC}"
+    read git_email
+    
+    git config --global user.name "$git_username"
+    git config --global user.email "$git_email"
+fi
 
 # Initialize repository if not already initialized
 if [ ! -d .git ]; then
@@ -27,7 +30,6 @@ if [ ! -d .git ]; then
     git remote add origin https://github.com/prabhavjain2004/nfc.git
 else
     # Update remote URL if repository exists
-    echo -e "\n${GREEN}Updating remote repository URL...${NC}"
     git remote set-url origin https://github.com/prabhavjain2004/nfc.git
 fi
 
