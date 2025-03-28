@@ -64,12 +64,12 @@ WSGI_APPLICATION = 'nfc_system.wsgi.application'
 # Database
 DATABASES = {
     'default': {
-        'ENGINE': os.environ['ENGINE'],
-        'HOST': os.environ['HOST'],
-        'NAME': os.environ['NAME'],
-        'USER': "postgres.zaicqjglcouurxejlmsk",
-        'PASSWORD': os.environ['PASSWORD'],
-        'PORT': os.environ['PORT'],
+        'ENGINE': os.getenv('ENGINE', 'django.db.backends.postgresql_psycopg2'),
+        'HOST': os.getenv('HOST', ''),
+        'NAME': os.getenv('NAME', ''),
+        'USER': os.getenv('USER', ''),
+        'PASSWORD': os.getenv('PASSWORD', ''),
+        'PORT': os.getenv('PORT', '5432'),
     }
 }
 
